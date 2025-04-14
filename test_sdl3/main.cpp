@@ -1,128 +1,187 @@
-/* textures.c ... */
+﻿#include <SDL3/SDL.h>
+#include "./oggetti.h"
+#include <iostream>
 
-/*
- * This example creates an SDL window and renderer, and then draws some
- * textures to it every frame.
- *
- * This code is public domain. Feel free to use it for any purpose!
- */
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define FPS_CAP 80
 
-#define SDL_MAIN_USE_CALLBACKS 0  /* use the callbacks instead of main() */
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
-
- /* We will use this renderer to draw into this window every frame. */
-static SDL_Window* window = NULL;
-static SDL_Renderer* renderer = NULL;
-static SDL_Texture* texture = NULL;
-static int texture_width = 0;
-static int texture_height = 0;
-
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
-
-/* This function runs once at startup. */
-SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
-{
-    SDL_Surface* surface = NULL;
-    char* bmp_path = NULL;
-
-    SDL_SetAppMetadata("Example Renderer Textures", "1.0", "com.example.renderer-textures");
-
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
+bool Init(SDL_Window** window, SDL_Renderer** renderer) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+        return false;
     }
 
-    if (!SDL_CreateWindowAndRenderer("examples/renderer/textures", WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer)) {
-        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
+    *window = SDL_CreateWindow("SDL3 Template", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    if (!*window) {
+        SDL_Log("Could not create window: %s", SDL_GetError());
+        return false;
     }
 
-    /* Textures are pixel data that we upload to the video hardware for fast drawing. Lots of 2D
-       engines refer to these as "sprites." We'll do a static texture (upload once, draw many
-       times) with data from a bitmap file. */
-
-       /* SDL_Surface is pixel data the CPU can access. SDL_Texture is pixel data the GPU can access.
-          Load a .bmp into a surface, move it to a texture from there. */
-    SDL_asprintf(&bmp_path, "%simmagini\\sample.bmp", SDL_GetBasePath());  /* allocate a string of the full file path */
-    surface = SDL_LoadBMP(bmp_path);
-    if (!surface) {
-        SDL_Log("Couldn't load bitmap: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
+    *renderer = SDL_CreateRenderer(*window, NULL);  // No flags needed in SDL3
+    if (!*renderer) {
+        SDL_Log("Could not create renderer: %s", SDL_GetError());
+        return false;
     }
 
-    SDL_free(bmp_path);  /* done with this, the file is loaded. */
-
-    texture_width = surface->w;
-    texture_height = surface->h;
-
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!texture) {
-        SDL_Log("Couldn't create static texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    SDL_DestroySurface(surface);  /* done with this, the texture has a copy of the pixels now. */
-
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
+    return true;
 }
 
-/* This function runs when a new event (mouse input, keypresses, etc) occurs. */
-SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
-{
-    if (event->type == SDL_EVENT_QUIT) {
-        return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
+float altezza = 100;
+float larghezza = 50;
+
+SDL_FRect* body1 = new SDL_FRect{100,100,larghezza,altezza};
+Players* player1 = new Players(*body1, 100, 0, 255, 255);
+
+SDL_FRect* body2 = new SDL_FRect{ WINDOW_WIDTH - larghezza * 2,WINDOW_HEIGHT - altezza * 2,larghezza ,altezza};
+Players* player2= new Players(*body2, 100, 255, 0, 255);
+
+const Uint8* keystates = SDL_GetKeyboardState(NULL);
+
+
+void HandleEvents(bool* running) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_EVENT_QUIT) {
+            *running = false;
+        }
     }
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
-/* This function runs once per frame, and is the heart of the program. */
-SDL_AppResult SDL_AppIterate(void* appstate)
-{
-    SDL_FRect dst_rect;
-    const Uint64 now = SDL_GetTicks();
 
-    /* we'll have some textures move around over a few seconds. */
-    const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
-    const float scale = ((float)(((int)(now % 1000)) - 500) / 500.0f) * direction;
 
-    /* as you can see from this, rendering draws over whatever was drawn before it. */
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);  /* black, full alpha */
-    SDL_RenderClear(renderer);  /* start with a blank canvas. */
+int determineDirectionPlayers(int num_player) {
+    //scan the input key assegned to the player 1 and return the direction in wich i needs to move keys(w,s)
+    switch (num_player)
+    {
+    case 1:
+        if (keystates[SDL_SCANCODE_S])
+            return -1;
 
-    /* Just draw the static texture a few times. You can think of it like a
-       stamp, there isn't a limit to the number of times you can draw with it. */
+        if (keystates[SDL_SCANCODE_W])
+            return 1;
+        break;
+    case 2:
+        if (keystates[SDL_SCANCODE_DOWN])
+            return -1;
 
-       /* top left */
-    dst_rect.x = (100.0f * scale);
-    dst_rect.y = 0.0f;
-    dst_rect.w = (float)texture_width;
-    dst_rect.h = (float)texture_height;
-    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
-
-    /* center this one. */
-    dst_rect.x = ((float)(WINDOW_WIDTH - texture_width)) / 2.0f;
-    dst_rect.y = ((float)(WINDOW_HEIGHT - texture_height)) / 2.0f;
-    dst_rect.w = (float)texture_width;
-    dst_rect.h = (float)texture_height;
-    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
-
-    /* bottom right. */
-    dst_rect.x = ((float)(WINDOW_WIDTH - texture_width)) - (100.0f * scale);
-    dst_rect.y = (float)(WINDOW_HEIGHT - texture_height);
-    dst_rect.w = (float)texture_width;
-    dst_rect.h = (float)texture_height;
-    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
-
-    SDL_RenderPresent(renderer);  /* put it all on the screen! */
-
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
+        if (keystates[SDL_SCANCODE_UP])
+            return 1;
+        break;
+    default:
+        break;
+    }
+        
+    
 }
 
-/* This function runs once at shutdown. */
-void SDL_AppQuit(void* appstate, SDL_AppResult result)
-{
-    SDL_DestroyTexture(texture);
-    /* SDL will clean up the window/renderer for us. */
+void Update(float deltaTime) {
+    // Your game logic here
+    player1->muoviti(determineDirectionPlayers(1), deltaTime,WINDOW_HEIGHT);
+    player2->muoviti(determineDirectionPlayers(2), deltaTime,WINDOW_HEIGHT);
+    // debug da eliminare poi
+    if (keystates[SDL_SCANCODE_K]) {
+        player1->speed -= 30;
+        player2->speed -= 30;
+    }
+    if (keystates[SDL_SCANCODE_L]) {
+        player1->speed += 30;
+        player2->speed += 30;
+    }
+    //std::cout << "posizione player 1=" << player1->body.y << std::endl;
+    //std::cout << "posizione player 2=" << player2->body.y<< std::endl;
+
+    
+
+    
+    
+
+
+    (void)deltaTime;
 }
+
+void Render(SDL_Renderer* renderer) {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    // render player 1
+    SDL_SetRenderDrawColor(renderer, player1->color.r, player1->color.g, player1->color.b,255);
+    SDL_RenderFillRect(renderer, &player1->body);
+    // render player 2
+    SDL_SetRenderDrawColor(renderer, player2->color.r, player2->color.g, player2->color.b, 255);
+    SDL_RenderFillRect(renderer, &player2->body);
+    SDL_RenderPresent(renderer);
+}
+
+
+
+Uint64 now = SDL_GetPerformanceCounter();
+Uint64 last = 0;
+double deltaTime = 0;
+
+int frameCount = 0;
+double fps = 0;
+double fpsTimer = 0;
+
+
+
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+
+    SDL_Window* window = NULL;
+    SDL_Renderer* renderer = NULL;
+
+    if (!Init(&window, &renderer)) {
+        return 1;
+    }
+
+    bool running = true;
+    Uint64 now = SDL_GetTicks();
+    Uint64 last = now;
+    float deltaTime = 0;
+    const Uint32 frameDelay = 1000 / FPS_CAP;
+
+    // ✅ Add these:
+    int frameCount = 0;
+    float fps = 0.0f;
+    Uint64 fpsTimer = SDL_GetTicks();
+
+    while (running) {
+        last = now;
+        now = SDL_GetTicks();
+        deltaTime = (now - last) / 1000.0f;
+
+        frameCount++;  // ✅ Count frames
+
+        if (now - fpsTimer >= 1000) { // 1 second passed
+            fps = frameCount * 1000.0f / (now - fpsTimer);
+            std::cout << "FPS: " << (int)fps << std::endl;
+
+            fpsTimer = now;
+            frameCount = 0;
+        }
+
+        HandleEvents(&running);
+        Update(deltaTime);
+        Render(renderer);
+
+        // apply fps cap
+        Uint32 frameTime = SDL_GetTicks() - now;
+        if (frameTime < frameDelay) {
+            SDL_Delay(frameDelay - frameTime);
+        }
+
+
+        const Uint8* keystates = SDL_GetKeyboardState(NULL);
+        if (keystates[SDL_SCANCODE_ESCAPE])
+            break;
+    }
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return 0;
+}
+

@@ -19,4 +19,9 @@
       <Filter>File di risorse</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="oggetti.h">
+      <Filter>File di risorse</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
