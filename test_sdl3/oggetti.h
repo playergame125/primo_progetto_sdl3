@@ -66,4 +66,7 @@ public:
     float speed;
     SDL_Color color;
     float direzione[2] = {0,0};//x y
+    void muovi() {
+
+    }
 };
