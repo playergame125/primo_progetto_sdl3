@@ -36,6 +36,9 @@ Players* player1 = new Players(*body1, 100, 0, 255, 255);
 SDL_FRect* body2 = new SDL_FRect{ WINDOW_WIDTH - larghezza * 2,WINDOW_HEIGHT - altezza * 2,larghezza ,altezza};
 Players* player2= new Players(*body2, 100, 255, 0, 255);
 
+SDL_FRect* balls = new SDL_FRect{ WINDOW_WIDTH / 2,WINDOW_HEIGHT / 2,20,20 };
+
+
 const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
 
@@ -110,6 +113,10 @@ void Render(SDL_Renderer* renderer) {
     // render player 2
     SDL_SetRenderDrawColor(renderer, player2->color.r, player2->color.g, player2->color.b, 255);
     SDL_RenderFillRect(renderer, &player2->body);
+
+    //render ball
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderFillRect(renderer, balls);
     SDL_RenderPresent(renderer);
 }
 
