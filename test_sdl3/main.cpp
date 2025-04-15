@@ -27,6 +27,8 @@ bool Init(SDL_Window** window, SDL_Renderer** renderer) {
     return true;
 }
 
+bool is_paused = false;
+
 float altezza = 100;
 float larghezza = 50;
 
@@ -37,7 +39,7 @@ SDL_FRect* body2 = new SDL_FRect{ WINDOW_WIDTH - larghezza * 2,WINDOW_HEIGHT - a
 Players* player2= new Players(*body2, 100, 255, 0, 255);
 
 SDL_FRect* balls = new SDL_FRect{ WINDOW_WIDTH / 2,WINDOW_HEIGHT / 2,20,20 };
-
+Ball* palla = new Ball(*balls, 2, 255, 255,255);
 
 const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
@@ -82,6 +84,12 @@ void Update(float deltaTime) {
     // Your game logic here
     player1->muoviti(determineDirectionPlayers(1), deltaTime,WINDOW_HEIGHT);
     player2->muoviti(determineDirectionPlayers(2), deltaTime,WINDOW_HEIGHT);
+
+    //update della palla
+    if (!is_paused) {
+        palla->muovi();
+    }
+
     // debug da eliminare poi
     if (keystates[SDL_SCANCODE_K]) {
         player1->speed -= 30;
@@ -116,7 +124,7 @@ void Render(SDL_Renderer* renderer) {
 
     //render ball
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, balls);
+    SDL_RenderFillRect(renderer, &palla->body);
     SDL_RenderPresent(renderer);
 }
 

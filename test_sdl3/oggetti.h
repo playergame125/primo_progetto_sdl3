@@ -65,8 +65,14 @@ public:
     SDL_FRect body;
     float speed;
     SDL_Color color;
-    float direzione[2] = {0,0};//x y
+
+    
+
+    //
+    float direzione[2] = {1,1};//x y    
     void muovi() {
+        body.x = body.x + (speed * direzione[0]);
+        body.y = body.y - (speed * direzione[1]);
 
     }
 };
