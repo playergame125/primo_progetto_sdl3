@@ -112,7 +112,7 @@ public:
     float calculate_angle() {
         float angle;
         
-           angle = atan2f(body.y - last_bounce[1], body.x - last_bounce[0]);
+           angle = atan2f(body.y - last_bounce[1], body.x - last_bounce[0 ]);
 
         std::cout << "lastbounce x=" << last_bounce[0] << ",y=" << last_bounce[1] << "\n attuale x=" << body.x << ",y=" << body.y << "\n differenza x=" << body.x - last_bounce[0] << ",y=" << body.y - last_bounce[1];
         std::cout << "angolo calcolato=" << angle << std::endl;
