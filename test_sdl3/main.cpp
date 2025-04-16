@@ -39,7 +39,7 @@ SDL_FRect* body2 = new SDL_FRect{ WINDOW_WIDTH - larghezza * 2,WINDOW_HEIGHT - a
 Players* player2= new Players(*body2, 100, 255, 0, 255);
 
 SDL_FRect* balls = new SDL_FRect{ WINDOW_WIDTH / 2,WINDOW_HEIGHT / 2,20,20 };
-Ball* palla = new Ball(*balls, 2, 255, 255,255);
+Ball* palla = new Ball(*balls, .5, 255, 255,255);
 
 const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
@@ -84,10 +84,12 @@ void Update(float deltaTime) {
     // Your game logic here
     player1->muoviti(determineDirectionPlayers(1), deltaTime,WINDOW_HEIGHT);
     player2->muoviti(determineDirectionPlayers(2), deltaTime,WINDOW_HEIGHT);
+   // std::cout << "bounced by vakire=" << palla->bounced_by_left<< std::endl;
 
     //update della palla
     if (!is_paused) {
-        palla->muovi();
+        palla->muovi(WINDOW_HEIGHT,WINDOW_WIDTH,player1->body,player2->body);
+
     }
 
     // debug da eliminare poi
@@ -98,6 +100,7 @@ void Update(float deltaTime) {
     if (keystates[SDL_SCANCODE_L]) {
         player1->speed += 30;
         player2->speed += 30;
+        palla->speed += .5;
     }
     //std::cout << "posizione player 1=" << player1->body.y << std::endl;
     //std::cout << "posizione player 2=" << player2->body.y<< std::endl;
@@ -171,11 +174,12 @@ int main(int argc, char* argv[]) {
 
         if (now - fpsTimer >= 1000) { // 1 second passed
             fps = frameCount * 1000.0f / (now - fpsTimer);
-            std::cout << "FPS: " << (int)fps << std::endl;
+            //std::cout << "FPS: " << (int)fps << std::endl;
 
             fpsTimer = now;
             frameCount = 0;
         }
+        
 
         HandleEvents(&running);
         Update(deltaTime);
