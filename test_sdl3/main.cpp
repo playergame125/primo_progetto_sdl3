@@ -1,10 +1,18 @@
 ﻿#include <SDL3/SDL.h>
 #include "./oggetti.h"
 #include <iostream>
+#include <random>
+
+
+
+
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define FPS_CAP 80
+
+std::random_device generatore_random;
+std::mt19937 gen(generatore_random());
 
 bool Init(SDL_Window** window, SDL_Renderer** renderer) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -65,6 +73,7 @@ int determineDirectionPlayers(int num_player) {
 
         if (keystates[SDL_SCANCODE_W])
             return 1;
+        return 0;
         break;
     case 2:
         if (keystates[SDL_SCANCODE_DOWN])
@@ -73,13 +82,14 @@ int determineDirectionPlayers(int num_player) {
         if (keystates[SDL_SCANCODE_UP])
             return 1;
         break;
+        return 0;
     default:
         break;
     }
         
     
 }
-
+SDL_Color color= SDL_Color{ 255,255,255,255 };
 void Update(float deltaTime) {
     // Your game logic here
     player1->muoviti(determineDirectionPlayers(1), deltaTime,WINDOW_HEIGHT);
@@ -88,7 +98,8 @@ void Update(float deltaTime) {
 
     //update della palla
     if (!is_paused) {
-        palla->muovi(WINDOW_HEIGHT,WINDOW_WIDTH,player1->body,player2->body);
+        palla->muovi(WINDOW_HEIGHT,WINDOW_WIDTH,player1,player2,gen);
+        palla->randomize_paddle_bounce(true, gen);
 
     }
 
@@ -96,11 +107,12 @@ void Update(float deltaTime) {
     if (keystates[SDL_SCANCODE_K]) {
         player1->speed -= 30;
         player2->speed -= 30;
+        palla->speed -= .2;
     }
     if (keystates[SDL_SCANCODE_L]) {
         player1->speed += 30;
         player2->speed += 30;
-        palla->speed += .5;
+        palla->speed += .2;
     }
     //std::cout << "posizione player 1=" << player1->body.y << std::endl;
     //std::cout << "posizione player 2=" << player2->body.y<< std::endl;
@@ -129,6 +141,9 @@ void Render(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &palla->body);
     SDL_RenderPresent(renderer);
+
+   
+    
 }
 
 
@@ -150,9 +165,15 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
 
+
+
+
     if (!Init(&window, &renderer)) {
+
         return 1;
     }
+
+   
 
     bool running = true;
     Uint64 now = SDL_GetTicks();
@@ -200,6 +221,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
 
     return 0;
 }

@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <iostream>
 #include <cmath>
+#include <random>
 #define PI 3.14159
 
 
@@ -19,16 +20,22 @@ public:
     SDL_FRect body;
     float speed;
     SDL_Color color;
+    int las_direction;
+
     void muoviti(int direzione,float deltatime,int windowheight) {
-        if (direzione > 0)
+        las_direction = direzione;
+        if (direzione > 0) {
             direzione = 1;
+        }
         else
-            if(direzione != 0)
+            if (direzione != 0) {
                 direzione = -1;
+            }
         
         if(checkBoundaries(windowheight,direzione))
             body.y =body.y - (direzione * speed)*deltatime;
     }
+
 
 
     bool checkBoundaries(int window_height,int direzione) {
@@ -74,31 +81,135 @@ public:
     SDL_Color color;
     //
     float direzione[2] = {-1,1};//x y 
-    void muovi(int windowheight,int windowwidth,SDL_FRect player1, SDL_FRect player2) {
-        if (check_boundaries(windowheight,windowwidth,player1,player2)) {
+    void muovi(int windowheight,int windowwidth,Players* player1, Players* player2,std::mt19937& generatore_random) {
+        if (check_boundaries(windowheight,windowwidth,player1->body,player2->body)) {
             body.x = body.x + (speed * direzione[0]);
             body.y = body.y - (speed * direzione[1]);
         }
         else
         {
-            bounce();
+            bounce(player1,player2,windowwidth,generatore_random);
         }
     }
 
 
-    void bounce() {
+    void bounce(Players* p1, Players* p2,int windowwidth, std::mt19937& generatore_random) {
         //calculate the angle with the older coordinates
-        if (last_touch != bounced_by_left) {
+        if (last_touch != bounced_by_left || last_touch==0) {
             angle = calculate_angle();
-
+            
             //change the direction based on the angle just calculated
             std::cout << "calculated angle (degrees)=" << angle * 180.0f / PI << "\n";
-            if(bounced_by_left==1 || bounced_by_left==-1)
+            if (bounced_by_left == 1 || bounced_by_left == -1) {
+                bool boos_up = false;// true if needs to be bounced up(+5/0 degre) else false(-5/0 degree)
+                //enters if bounced by player
+                if (bounced_by_left==1) {
+                    //vounced by player1
+                    float changes= rand() % 88;
+                    std::cout << "bounced by player 1" << "\n";
+                    switch (p1->las_direction)
+                    {
+                        case 1:
+                            if (direzione[1] > 0) {
+                                //bounced in accordanza qunidi si deve boostare
+                                
+                                boos_up = true;
+                                //std::cout << "bounced in accordanza"<<randomize_paddle_bounce(boos_up, generatore_random)<<"\n";
+                                std::cout << "angolo bounce prima=" <<angle * 180.0f / PI;
+                                angle += randomize_paddle_bounce(boos_up, generatore_random);
+                                std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+                                
+
+                            }
+                            else {
+                                boos_up = false;
+                                //std::cout << "bounced non accordanza" << randomize_paddle_bounce(boos_up, generatore_random) << "\n";
+                                std::cout << "angolo bounce prima=" << angle * 180.0f / PI;
+                                angle -= randomize_paddle_bounce(boos_up, generatore_random);
+                                std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+                            }
+                            break;
+                        case -1:
+                            if (direzione[1] < 0) {
+                                //bounced non in accordanza quindi é da nerfare
+
+                                boos_up = true;
+                                //std::cout << "bounced in accordanza" << randomize_paddle_bounce(boos_up, generatore_random) << "\n";
+                                std::cout << "angolo bounce prima=" << angle * 180.0f / PI;
+                                angle -= randomize_paddle_bounce(boos_up, generatore_random);
+                                std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+                            }
+                            else {
+                                boos_up = false;
+                                //std::cout << "bounced non accordanza" << randomize_paddle_bounce(boos_up, generatore_random) << "\n";
+                                std::cout << "angolo bounce prima=" << angle * 180.0f / PI;
+                                angle += randomize_paddle_bounce(boos_up, generatore_random);
+                                std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+                            }
+                            break;
+
+                    default:
+                        std::cout << "bounce base" << "\n";
+                        break;
+                    }
+                }
+                else {
+                    std::cout << "bounced by player 2" << "\n";
+                    switch (p2->las_direction)
+                    {
+                    case 1:
+                        if (direzione[1] > 0) {
+                            //bounced in accordanza qunidi si deve boostare
+
+                            boos_up = true;
+                            //std::cout << "bounced in accordanza"<<randomize_paddle_bounce(boos_up, generatore_random)<<"\n";
+                            std::cout << "angolo bounce prima=" << angle * 180.0f / PI;
+                            angle += randomize_paddle_bounce(boos_up, generatore_random);
+                            std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+
+
+                        }
+                        else {
+                            boos_up = false;
+                            //std::cout << "bounced non accordanza" << randomize_paddle_bounce(boos_up, generatore_random) << "\n";
+                            std::cout << "angolo bounce prima=" << angle * 180.0f / PI;
+                            angle -= randomize_paddle_bounce(boos_up, generatore_random);
+                            std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+                        }
+                        break;
+                    case -1:
+                        if (direzione[1] < 0) {
+                            //bounced non in accordanza quindi é da nerfare
+
+                            boos_up = true;
+                            //std::cout << "bounced in accordanza" << randomize_paddle_bounce(boos_up, generatore_random) << "\n";
+                            std::cout << "angolo bounce prima=" << angle * 180.0f / PI;
+                            angle -= randomize_paddle_bounce(boos_up, generatore_random);
+                            std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+                        }
+                        else {
+                            boos_up = false;
+                            //std::cout << "bounced non accordanza" << randomize_paddle_bounce(boos_up, generatore_random) << "\n";
+                            std::cout << "angolo bounce prima=" << angle * 180.0f / PI;
+                            angle += randomize_paddle_bounce(boos_up, generatore_random);
+                            std::cout << "-angolo dopo=" << angle * 180.0f / PI << "\n";
+                        }
+                        break;
+                    default:
+                        std::cout << "bounce base" << "\n";
+                        break;
+                    }
+                }
+
                 direzione[0] = -1 * cos(angle);
+                direzione[1] = -1 * sin(angle);
+
+            }
             else {
                 direzione[0] = 1 * cos(angle);
-            }
                 direzione[1] = sin(angle);
+            }
+            
             
             std::cout << "nuova direzione x=" << direzione[0] << ",y=" << direzione[1] << std::endl;
             //save where the bounce coordinate are
@@ -106,6 +217,20 @@ public:
                 last_bounce[0] = body.x;
                 last_bounce[1] = body.y;
             
+        }
+    }
+
+    float randomize_paddle_bounce(bool is_accordanza,std::mt19937& generatore_random) {
+        //calculate the degree ge needs to change bu a random number
+        
+        std::uniform_real_distribution<float> dist(0.0f, 0.087f);
+        if (is_accordanza) {
+            return dist(generatore_random);
+
+        }
+        else
+        {
+            return -1*dist(generatore_random);
         }
     }
 
@@ -136,17 +261,22 @@ public:
         }
         if (body.y + body.h >= windowheigt) {
             //clamp down
-            if (direzione[1] >= 0)
+            if (direzione[1] >= 0) {
                 return true;
-            else
+                
+            }
+            else {
+                //std::cout << "clamp down" << "\n";
                 return false;
+            }
+                
         }
 
         //check collisione con players
         if (body.x < windowwidth / 2) {
             //std::cout << "check player1 parte" << std::endl;
             if (SDL_HasRectIntersectionFloat(&body, &player1)) {
-                std::cout << "detected collision with player 1" << std::endl;
+                //std::cout << "detected collision with player 1" << std::endl;
                 bounced_by_left = 1;
                 if (last_touch == 1) {
                     //std::cout << "falsificato risultati" << std::endl;
