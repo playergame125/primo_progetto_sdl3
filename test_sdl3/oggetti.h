@@ -7,6 +7,12 @@
 #define PI 3.14159
 
 
+
+
+#define BIANCO SDL_Color color{255,255,255}
+#define NERO SDL_Color color{0,0,0}
+
+
 struct Players {
 public:
     /*Players(SDL_FRect body, float speed, int r, int g, int b) {
@@ -21,6 +27,7 @@ public:
     float speed;
     SDL_Color color;
     int las_direction;
+    int point = 0;
 
     void muoviti(int direzione,float deltatime,int windowheight) {
         las_direction = direzione;
@@ -36,6 +43,9 @@ public:
             body.y =body.y - (direzione * speed)*deltatime;
     }
 
+    void addPoint(int punti) {
+        point += punti;
+    }
 
 
     bool checkBoundaries(int window_height,int direzione) {
@@ -105,6 +115,11 @@ public:
                 //enters if bounced by player
                 if (bounced_by_left==1) {
                     //vounced by player1
+                    
+                    //debug 
+                    //--------------
+                    p1->addPoint(1);
+                    //---------------
                     float changes= rand() % 88;
                     std::cout << "bounced by player 1" << "\n";
                     switch (p1->las_direction)
@@ -155,6 +170,7 @@ public:
                 }
                 else {
                     std::cout << "bounced by player 2" << "\n";
+                    p2->addPoint(1);
                     switch (p2->las_direction)
                     {
                     case 1:

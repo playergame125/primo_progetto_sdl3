@@ -2,6 +2,8 @@
 #include "./oggetti.h"
 #include <iostream>
 #include <random>
+#include <string>
+#include <sstream>
 #include <SDL3_ttf/SDL_ttf.h>
 
 
@@ -10,6 +12,8 @@
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+#define POINTBOXW 200//width point box
+#define POINTBOXH 200//heigtpoint box
 #define FPS_CAP 80
 
 std::random_device generatore_random;
@@ -50,10 +54,11 @@ Players* player2= new Players(*body2, 100, 255, 0, 255);
 SDL_FRect* balls = new SDL_FRect{ WINDOW_WIDTH / 2,WINDOW_HEIGHT / 2,20,20 };
 Ball* palla = new Ball(*balls, .5, 255, 255,255);
 
+TTF_Font* myFont;
+
 //tutto temporaneo pere test libnreria
-SDL_FRect* TextBox = new SDL_FRect{ 10,10,400,400 };
-SDL_Surface* SurfaceText;
-SDL_Texture* TextureText;
+SDL_FRect* pointBox = new SDL_FRect{ WINDOW_WIDTH/2-POINTBOXW/2,0,POINTBOXW,POINTBOXH};
+SDL_Texture* pointText;//texture punteggio
 
 const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
@@ -95,6 +100,14 @@ int determineDirectionPlayers(int num_player) {
         
     
 }
+void updateTextPoints(SDL_Renderer* renderer) {
+    SDL_DestroyTexture(pointText);
+    std::ostringstream mult;//create string stream
+    mult << player1->point << ":" << player2->point;
+    SDL_Surface* temp = TTF_RenderText_Solid(myFont,mult.str().c_str(), 0, SDL_Color{255,255,255});
+    pointText = SDL_CreateTextureFromSurface(renderer, temp);
+    SDL_DestroySurface(temp);
+}
 SDL_Color color= SDL_Color{ 255,255,255,255 };
 void Update(float deltaTime) {
     // Your game logic here
@@ -106,6 +119,7 @@ void Update(float deltaTime) {
     if (!is_paused) {
         palla->muovi(WINDOW_HEIGHT,WINDOW_WIDTH,player1,player2,gen);
         palla->randomize_paddle_bounce(true, gen);
+        
 
     }
 
@@ -150,7 +164,7 @@ void Render(SDL_Renderer* renderer) {
 
     //render text box(solo test temporaneo)
    
-    SDL_RenderTexture(renderer, TextureText, NULL, TextBox);
+    SDL_RenderTexture(renderer, pointText, NULL, pointBox);
     
     SDL_RenderPresent(renderer);
 }
@@ -183,7 +197,7 @@ int main(int argc, char* argv[]) {
     }
 
     //load the font
-    TTF_Font* myFont = TTF_OpenFont("./fonts/minecrafter.reg.ttf", 32);
+    myFont = TTF_OpenFont("./fonts/EthnocentricRgIt.otf", 32);
 
     if (myFont == nullptr) {
         std::cout << "font non caricato" << std::endl;
@@ -212,15 +226,16 @@ int main(int argc, char* argv[]) {
 
     //solo per test della ttf libreria
     //create the texture surface from a font
-    SurfaceText= TTF_RenderText_Solid(myFont, "se vedi questo cassa", 0, SDL_Color{ 255,255,255 });
+    //SurfaceText= TTF_RenderText_Solid(myFont, "22", 0, SDL_Color{ 0,255,255 });
     //convert the surface in a texture so it can be applied to a rectangle and displayed
-    TextureText = SDL_CreateTextureFromSurface(renderer, SurfaceText);
+    //TextureText = SDL_CreateTextureFromSurface(renderer, SurfaceText);
     //libreo la superfice
-    SDL_DestroySurface(SurfaceText);
+    //SDL_DestroySurface(SurfaceText);
     //create the rectangle on wich the texture will be displayed
     
 
-
+    //initialize the point scoreboard
+    updateTextPoints(renderer);
     while (running) {
         last = now;
         now = SDL_GetTicks();
@@ -239,6 +254,7 @@ int main(int argc, char* argv[]) {
 
         HandleEvents(&running);
         Update(deltaTime);
+        updateTextPoints(renderer);
         Render(renderer);
 
         // apply fps cap
@@ -248,11 +264,11 @@ int main(int argc, char* argv[]) {
         }
 
 
-        const Uint8* keystates = SDL_GetKeyboardState(NULL);
+        keystates = SDL_GetKeyboardState(NULL);
         if (keystates[SDL_SCANCODE_ESCAPE])
             break;
     }
-    SDL_DestroyTexture(TextureText);
+    SDL_DestroyTexture(pointText);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_CloseFont(myFont);
