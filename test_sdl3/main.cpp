@@ -2,6 +2,7 @@
 #include "./oggetti.h"
 #include <iostream>
 #include <random>
+#include <SDL3_ttf/SDL_ttf.h>
 
 
 
@@ -48,6 +49,11 @@ Players* player2= new Players(*body2, 100, 255, 0, 255);
 
 SDL_FRect* balls = new SDL_FRect{ WINDOW_WIDTH / 2,WINDOW_HEIGHT / 2,20,20 };
 Ball* palla = new Ball(*balls, .5, 255, 255,255);
+
+//tutto temporaneo pere test libnreria
+SDL_FRect* TextBox = new SDL_FRect{ 10,10,400,400 };
+SDL_Surface* SurfaceText;
+SDL_Texture* TextureText;
 
 const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
@@ -140,10 +146,13 @@ void Render(SDL_Renderer* renderer) {
     //render ball
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &palla->body);
-    SDL_RenderPresent(renderer);
-
-   
     
+
+    //render text box(solo test temporaneo)
+   
+    SDL_RenderTexture(renderer, TextureText, NULL, TextBox);
+    
+    SDL_RenderPresent(renderer);
 }
 
 
@@ -165,9 +174,23 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
 
+    //initialize the ttf library
+    if (TTF_Init() == -1) {
+        std::cout << "non é styato possibbile inizial;izzare ttf:" << SDL_GetError();
+    }
+    else {
+        std::cout << "riuscito ad inizializzare"<<std::endl;
+    }
+
+    //load the font
+    TTF_Font* myFont = TTF_OpenFont("./fonts/minecrafter.reg.ttf", 32);
+
+    if (myFont == nullptr) {
+        std::cout << "font non caricato" << std::endl;
+    }
 
 
-
+    
     if (!Init(&window, &renderer)) {
 
         return 1;
@@ -185,6 +208,18 @@ int main(int argc, char* argv[]) {
     int frameCount = 0;
     float fps = 0.0f;
     Uint64 fpsTimer = SDL_GetTicks();
+
+
+    //solo per test della ttf libreria
+    //create the texture surface from a font
+    SurfaceText= TTF_RenderText_Solid(myFont, "se vedi questo cassa", 0, SDL_Color{ 255,255,255 });
+    //convert the surface in a texture so it can be applied to a rectangle and displayed
+    TextureText = SDL_CreateTextureFromSurface(renderer, SurfaceText);
+    //libreo la superfice
+    SDL_DestroySurface(SurfaceText);
+    //create the rectangle on wich the texture will be displayed
+    
+
 
     while (running) {
         last = now;
@@ -217,9 +252,10 @@ int main(int argc, char* argv[]) {
         if (keystates[SDL_SCANCODE_ESCAPE])
             break;
     }
-
+    SDL_DestroyTexture(TextureText);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_CloseFont(myFont);
     SDL_Quit();
 
 
