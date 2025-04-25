@@ -23,5 +23,8 @@
     <ClInclude Include="oggetti.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
+    <ClInclude Include="startmenu.h">
+      <Filter>File di risorse</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

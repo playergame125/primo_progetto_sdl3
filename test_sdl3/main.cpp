@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 #include <SDL3_ttf/SDL_ttf.h>
-
+#include "./startmenu.h"
 
 
 
@@ -54,14 +54,29 @@ Players* player2= new Players(*body2, 100, 255, 0, 255);
 SDL_FRect* balls = new SDL_FRect{ WINDOW_WIDTH / 2,WINDOW_HEIGHT / 2,20,20 };
 Ball* palla = new Ball(*balls, .5, 255, 255,255);
 
+
+
 TTF_Font* myFont;
+
 
 //tutto temporaneo pere test libnreria
 SDL_FRect* pointBox = new SDL_FRect{ WINDOW_WIDTH/2-POINTBOXW/2,0,POINTBOXW,POINTBOXH};
 SDL_Texture* pointText;//texture punteggio
 
+Startmenu* startmenu;//creo il menú di start
+
 const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
+enum GameState
+{
+    STARTMENU,
+    RUNNINGGAME,
+    PAUSEMENU,
+    SCOREBOARD,
+    LOGIN
+};
+
+int game = STARTMENU;
 
 void HandleEvents(bool* running) {
     SDL_Event event;
@@ -109,7 +124,22 @@ void updateTextPoints(SDL_Renderer* renderer) {
     SDL_DestroySurface(temp);
 }
 SDL_Color color= SDL_Color{ 255,255,255,255 };
-void Update(float deltaTime) {
+
+
+void fattogoal(Players* vincitore, SDL_Renderer* renderer) {
+    //update player point
+    vincitore->addPoint(1);
+    //update pointbox
+    updateTextPoints(renderer);
+    //destroy palla attuale
+    delete palla;
+    //instantiate new ball
+    palla = new Ball(*balls, .5, 255, 255, 255);
+}
+
+
+
+void Update(float deltaTime,SDL_Renderer* renderer) {
     // Your game logic here
     player1->muoviti(determineDirectionPlayers(1), deltaTime,WINDOW_HEIGHT);
     player2->muoviti(determineDirectionPlayers(2), deltaTime,WINDOW_HEIGHT);
@@ -117,7 +147,12 @@ void Update(float deltaTime) {
 
     //update della palla
     if (!is_paused) {
-        palla->muovi(WINDOW_HEIGHT,WINDOW_WIDTH,player1,player2,gen);
+        if (!palla->muovi(WINDOW_HEIGHT, WINDOW_WIDTH, player1, player2, gen)) {
+            if (!palla->outsideLeft())
+                fattogoal(player1, renderer);
+            else
+                fattogoal(player2, renderer);
+        }
         palla->randomize_paddle_bounce(true, gen);
         
 
@@ -135,16 +170,12 @@ void Update(float deltaTime) {
         palla->speed += .2;
     }
     //std::cout << "posizione player 1=" << player1->body.y << std::endl;
-    //std::cout << "posizione player 2=" << player2->body.y<< std::endl;
-
-    
-
-    
-    
-
-
+    //std::cout << "posizione player 2=" << player2->body.y<< std::endl
     (void)deltaTime;
 }
+
+
+
 
 void Render(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -165,7 +196,6 @@ void Render(SDL_Renderer* renderer) {
     //render text box(solo test temporaneo)
    
     SDL_RenderTexture(renderer, pointText, NULL, pointBox);
-    
     SDL_RenderPresent(renderer);
 }
 
@@ -187,7 +217,10 @@ int main(int argc, char* argv[]) {
 
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
-
+    
+    
+    game = RUNNINGGAME;
+    startmenu = new Startmenu(renderer);
     //initialize the ttf library
     if (TTF_Init() == -1) {
         std::cout << "non é styato possibbile inizial;izzare ttf:" << SDL_GetError();
@@ -253,9 +286,22 @@ int main(int argc, char* argv[]) {
         
 
         HandleEvents(&running);
-        Update(deltaTime);
-        updateTextPoints(renderer);
-        Render(renderer);
+        switch (game)
+        {
+        case STARTMENU:
+            //remain stuck here as long game remain in starteemu state
+            //std::cout << "fai tutte le cose per il menu di start" << std::endl;
+            startmenu->UpdateStartMenu();
+            startmenu->RenderStartMenu();
+            break;
+        case RUNNINGGAME:
+            //remain stuck here as long game remain in running game state
+            //std::cout << "fai tutte le cose per il game running" << std::endl;
+            Update(deltaTime, renderer);
+            Render(renderer);
+            break;
+        }
+        
 
         // apply fps cap
         Uint32 frameTime = SDL_GetTicks() - now;

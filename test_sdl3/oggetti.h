@@ -81,7 +81,16 @@ public:
 };
 struct Ball {
 public:
-    Ball(SDL_FRect body, float speed, int r, int g, int b) :body(body), speed(speed), color{ (Uint8)r,(Uint8)g,(Uint8)b } {}
+    Ball(SDL_FRect body, float speed, int r, int g, int b) :body(body), speed(speed), color{ (Uint8)r,(Uint8)g,(Uint8)b } {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+        //std::uniform_int_distribution<int> fas(-400, 400);
+        direzione[0] = dist(gen);
+        direzione[1] = dist(gen);
+        //last_bounce[0] = fas(gen);
+        //last_bounce[1] = fas(gen);
+    }
     SDL_FRect body;
     float speed;
     float angle;
@@ -91,17 +100,29 @@ public:
     SDL_Color color;
     //
     float direzione[2] = {-1,1};//x y 
-    void muovi(int windowheight,int windowwidth,Players* player1, Players* player2,std::mt19937& generatore_random) {
-        if (check_boundaries(windowheight,windowwidth,player1->body,player2->body)) {
-            body.x = body.x + (speed * direzione[0]);
-            body.y = body.y - (speed * direzione[1]);
+    bool muovi(int windowheight,int windowwidth,Players* player1, Players* player2,std::mt19937& generatore_random) {
+        if (body.x>0 && body.x<windowwidth) {
+            if (check_boundaries(windowheight, windowwidth, player1->body, player2->body)) {
+                body.x = body.x + (speed * direzione[0]);
+                body.y = body.y - (speed * direzione[1]);
+            }
+            else
+            {
+                bounce(player1, player2, windowwidth, generatore_random);
+            }
+            return true;
         }
-        else
-        {
-            bounce(player1,player2,windowwidth,generatore_random);
+        else {
+            return false;
         }
     }
 
+    bool outsideLeft() {
+        if (body.x > 0)
+            return false;//exited on the right(player2)
+        else
+            return true;//exited on the left
+    }
 
     void bounce(Players* p1, Players* p2,int windowwidth, std::mt19937& generatore_random) {
         //calculate the angle with the older coordinates
@@ -118,7 +139,7 @@ public:
                     
                     //debug 
                     //--------------
-                    p1->addPoint(1);
+                    //p1->addPoint(1);
                     //---------------
                     float changes= rand() % 88;
                     std::cout << "bounced by player 1" << "\n";
@@ -170,7 +191,7 @@ public:
                 }
                 else {
                     std::cout << "bounced by player 2" << "\n";
-                    p2->addPoint(1);
+                    //p2->addPoint(1);
                     switch (p2->las_direction)
                     {
                     case 1:
