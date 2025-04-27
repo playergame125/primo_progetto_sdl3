@@ -63,7 +63,7 @@ TTF_Font* myFont;
 SDL_FRect* pointBox = new SDL_FRect{ WINDOW_WIDTH/2-POINTBOXW/2,0,POINTBOXW,POINTBOXH};
 SDL_Texture* pointText;//texture punteggio
 
-Startmenu* startmenu;//creo il menú di start
+
 
 const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
@@ -219,8 +219,8 @@ int main(int argc, char* argv[]) {
     SDL_Renderer* renderer = NULL;
     
     
-    game = RUNNINGGAME;
-    startmenu = new Startmenu(renderer);
+    game = STARTMENU;
+    Startmenu* startmenu = new Startmenu();
     //initialize the ttf library
     if (TTF_Init() == -1) {
         std::cout << "non é styato possibbile inizial;izzare ttf:" << SDL_GetError();
@@ -228,6 +228,7 @@ int main(int argc, char* argv[]) {
     else {
         std::cout << "riuscito ad inizializzare"<<std::endl;
     }
+    
 
     //load the font
     myFont = TTF_OpenFont("./fonts/EthnocentricRgIt.otf", 32);
@@ -269,6 +270,8 @@ int main(int argc, char* argv[]) {
 
     //initialize the point scoreboard
     updateTextPoints(renderer);
+    //initializa the start menu
+    startmenu->init(renderer,WINDOW_HEIGHT,WINDOW_WIDTH);
     while (running) {
         last = now;
         now = SDL_GetTicks();
@@ -313,6 +316,14 @@ int main(int argc, char* argv[]) {
         keystates = SDL_GetKeyboardState(NULL);
         if (keystates[SDL_SCANCODE_ESCAPE])
             break;
+        if (keystates[SDL_SCANCODE_0])
+            game = STARTMENU;
+        if (keystates[SDL_SCANCODE_1])
+            game = RUNNINGGAME;
+        if (keystates[SDL_SCANCODE_SPACE] && game == STARTMENU)
+            game = RUNNINGGAME;
+
+            
     }
     SDL_DestroyTexture(pointText);
     SDL_DestroyRenderer(renderer);
