@@ -6,7 +6,7 @@
 #include <sstream>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "./startmenu.h"
-
+#include "./pausemenu.h"
 
 
 
@@ -52,7 +52,7 @@ SDL_FRect* body2 = new SDL_FRect{ WINDOW_WIDTH - larghezza * 2,WINDOW_HEIGHT - a
 Players* player2= new Players(*body2, 100, 255, 0, 255);
 
 SDL_FRect* balls = new SDL_FRect{ WINDOW_WIDTH / 2,WINDOW_HEIGHT / 2,20,20 };
-Ball* palla = new Ball(*balls, .5, 255, 255,255);
+Ball* palla = new Ball(*balls, 1, 255, 255,255);
 
 
 
@@ -218,9 +218,11 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
     
-    
+    bool SpaceLastPress = false;
     game = STARTMENU;
     Startmenu* startmenu = new Startmenu();
+    PauseMenu* pausemenu = new PauseMenu();
+    
     //initialize the ttf library
     if (TTF_Init() == -1) {
         std::cout << "non é styato possibbile inizial;izzare ttf:" << SDL_GetError();
@@ -270,8 +272,10 @@ int main(int argc, char* argv[]) {
 
     //initialize the point scoreboard
     updateTextPoints(renderer);
+
     //initializa the start menu
     startmenu->init(renderer,WINDOW_HEIGHT,WINDOW_WIDTH);
+    pausemenu->init(renderer, WINDOW_HEIGHT, WINDOW_WIDTH);
     while (running) {
         last = now;
         now = SDL_GetTicks();
@@ -303,6 +307,10 @@ int main(int argc, char* argv[]) {
             Update(deltaTime, renderer);
             Render(renderer);
             break;
+        case PAUSEMENU:
+            pausemenu->update();
+            pausemenu->render();
+            break;
         }
         
 
@@ -318,11 +326,23 @@ int main(int argc, char* argv[]) {
             break;
         if (keystates[SDL_SCANCODE_0])
             game = STARTMENU;
-        if (keystates[SDL_SCANCODE_1])
-            game = RUNNINGGAME;
-        if (keystates[SDL_SCANCODE_SPACE] && game == STARTMENU)
-            game = RUNNINGGAME;
-
+       
+        if (keystates[SDL_SCANCODE_SPACE]&&SpaceLastPress!= keystates[SDL_SCANCODE_SPACE]) {
+            switch (game)
+            {
+            case STARTMENU:
+                game = RUNNINGGAME;
+                break;
+            case RUNNINGGAME:
+                game = PAUSEMENU;
+                break;
+            case PAUSEMENU:
+                game = RUNNINGGAME;
+                break;
+            }
+        }
+            
+        SpaceLastPress = keystates[SDL_SCANCODE_SPACE];
             
     }
     SDL_DestroyTexture(pointText);

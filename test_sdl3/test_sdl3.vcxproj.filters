@@ -26,5 +26,8 @@
     <ClInclude Include="startmenu.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
+    <ClInclude Include="pausemenu.h">
+      <Filter>File di risorse</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
