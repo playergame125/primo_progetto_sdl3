@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-
+#include <iostream>
 
 struct Startmenu {
 	
@@ -13,7 +13,9 @@ struct Startmenu {
 	SDL_Texture* textureNomeUtente2;
 	SDL_Texture* premiSpazioTexture;
 	SDL_FRect* nomePlayer1;
+	std::string nomeUtente1;
 	SDL_FRect* nomePlayer2;
+	std::string nomeUtente2;
 	SDL_FRect* premiSpazio;
 	int windowWidth;
 	int windowHeight;
@@ -26,6 +28,8 @@ struct Startmenu {
 		nomePlayer1 = new SDL_FRect{ 0, 0, 250, 75 };
 		nomePlayer2 = new SDL_FRect{ 0, 75, 250, 75 };
 		premiSpazio = new SDL_FRect{((float)windowWidth-600)/2 ,(float)windowHeight - 100,600,75 };
+		nomeUtente1 = "matteo";
+		nomeUtente2 = "francesco";
 	}
 
 	void RenderStartMenu() {
@@ -59,8 +63,8 @@ struct Startmenu {
 		//this function will be called from the main when the game is the start menu state
 		if (times == 0) {
 			std::cout << "aggiornato nome--";
-			createTesto("matteo",&textureNomeUtente1,255,255,255,255);
-			createTesto("francesco",&textureNomeUtente2,255,255,255,255);
+			createTesto(nomeUtente1.c_str(), &textureNomeUtente1, 255, 255, 255, 255);
+			createTesto(nomeUtente2.c_str(), &textureNomeUtente2, 255, 255, 255, 255);
 			createTesto("premi spazio per giocare", &premiSpazioTexture, 127, 127, 127, 255);
 			times = 1;
 		}

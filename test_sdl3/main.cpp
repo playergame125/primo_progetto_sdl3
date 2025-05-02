@@ -7,6 +7,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include "./startmenu.h"
 #include "./pausemenu.h"
+#include "./gameover.h"
 
 
 
@@ -73,7 +74,8 @@ enum GameState
     RUNNINGGAME,
     PAUSEMENU,
     SCOREBOARD,
-    LOGIN
+    LOGIN,
+    GAMEOVER
 };
 
 int game = STARTMENU;
@@ -222,6 +224,7 @@ int main(int argc, char* argv[]) {
     game = STARTMENU;
     Startmenu* startmenu = new Startmenu();
     PauseMenu* pausemenu = new PauseMenu();
+    GameOverMenu* gamovermenu = new GameOverMenu();
     
     //initialize the ttf library
     if (TTF_Init() == -1) {
@@ -270,12 +273,18 @@ int main(int argc, char* argv[]) {
     //create the rectangle on wich the texture will be displayed
     
 
+
     //initialize the point scoreboard
     updateTextPoints(renderer);
-
+    //debug shit
+    bool passato = false;
     //initializa the start menu
     startmenu->init(renderer,WINDOW_HEIGHT,WINDOW_WIDTH);
     pausemenu->init(renderer, WINDOW_HEIGHT, WINDOW_WIDTH);
+    gamovermenu->init(renderer, WINDOW_HEIGHT, WINDOW_WIDTH,player1,player2);
+    //assign player name
+    player1->NomeUtente = startmenu->nomeUtente1;
+    player2->NomeUtente = startmenu->nomeUtente2;
     while (running) {
         last = now;
         now = SDL_GetTicks();
@@ -311,6 +320,23 @@ int main(int argc, char* argv[]) {
             pausemenu->update();
             pausemenu->render();
             break;
+        case GAMEOVER:
+            //only for debug purpose to remove at the end--------
+            if (player1->point > player2->point && passato==false) {
+                std::cout << "player 1 determined,player1="<<player1->point<< "--player2="<< player2->point << "\n";
+                gamovermenu->DetermineDisplayNamePlayer(1);
+                passato = true;
+            }
+            else {
+                if (!passato) {
+                    std::cout << "player 2 determined,player1=" << player1->point << "--player2=" << player2->point << "\n";
+                    gamovermenu->DetermineDisplayNamePlayer(2);
+                    passato = true;
+                }
+            }
+            gamovermenu->update();
+            gamovermenu->render();
+            break;
         }
         
 
@@ -325,7 +351,7 @@ int main(int argc, char* argv[]) {
         if (keystates[SDL_SCANCODE_ESCAPE])
             break;
         if (keystates[SDL_SCANCODE_0])
-            game = STARTMENU;
+            game = GAMEOVER;
        
         if (keystates[SDL_SCANCODE_SPACE]&&SpaceLastPress!= keystates[SDL_SCANCODE_SPACE]) {
             switch (game)
@@ -339,6 +365,8 @@ int main(int argc, char* argv[]) {
             case PAUSEMENU:
                 game = RUNNINGGAME;
                 break;
+            case GAMEOVER:
+                game = STARTMENU;
             }
         }
             

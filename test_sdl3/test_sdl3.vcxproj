@@ -144,6 +144,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="gameover.h" />
     <ClInclude Include="oggetti.h" />
     <ClInclude Include="pausemenu.h" />
     <ClInclude Include="startmenu.h" />

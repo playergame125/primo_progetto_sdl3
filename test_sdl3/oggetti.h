@@ -28,6 +28,7 @@ public:
     SDL_Color color;
     int las_direction;
     int point = 0;
+    std::string NomeUtente;
 
     void muoviti(int direzione,float deltatime,int windowheight) {
         las_direction = direzione;
