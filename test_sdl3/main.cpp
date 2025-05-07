@@ -17,6 +17,7 @@
 #define POINTBOXH 200//heigtpoint box
 #define FPS_CAP 80
 
+
 std::random_device generatore_random;
 std::mt19937 gen(generatore_random());
 
