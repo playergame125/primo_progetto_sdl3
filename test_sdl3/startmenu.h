@@ -2,8 +2,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <iostream>
+#include "json.hpp"
 
 struct Startmenu {
+	using json = nlohmann::json;
 	
 	int top_score;
 	SDL_Renderer* renderer;
@@ -63,6 +65,8 @@ struct Startmenu {
 		//this function will be called from the main when the game is the start menu state
 		if (times == 0) {
 			std::cout << "aggiornato nome--";
+			//insert load from file to test
+
 			createTesto(nomeUtente1.c_str(), &textureNomeUtente1, 255, 255, 255, 255);
 			createTesto(nomeUtente2.c_str(), &textureNomeUtente2, 255, 255, 255, 255);
 			createTesto("premi spazio per giocare", &premiSpazioTexture, 127, 127, 127, 255);
