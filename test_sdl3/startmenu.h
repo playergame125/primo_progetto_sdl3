@@ -76,13 +76,22 @@ struct Startmenu {
 			createTesto(nomeUtente2.c_str(), &textureNomeUtente2, 255, 255, 255, 255);
 			createTesto("premi spazio per giocare", &premiSpazioTexture, 127, 127, 127, 255);
 			//createJsonFile(jsonPath);
-			appendPlayer("francesco", 23);
-			appendPlayer("ugo", 43);
+			//appendPlayer("francesco", 23);
+			//appendPlayer("ugo", 43);
+			//std::cout<<doesItExist("lollo");
+			//std::cout <<doesItExist("laura");
+			updatePlayerData("lorenso", "laura");
+			std::cout << "output get info=" << getInfoPlayer("laura");
+			std::cout << "score di matteo" << getInfoPlayer("matteo", true);
+
+			//updatePlayerData("sugo", 2);
 
 
 			times = 1;
 		}
 	}
+
+
 	//this function is called when are sure that there is no json file and it creates it in the path that it gives to me
 	void createJsonFile(std::string path) {
 		//create/open file
@@ -131,9 +140,121 @@ struct Startmenu {
 		}
 		myfile << data.dump(4);  // pretty print with indentation
 		myfile.close();
-
 		std::cout << "Player added successfully\n";
 	}
-	//this function si called when i need to modify a specific player data given in input
-	//this function is called when i need to delte them from the fi
+
+	//this funciton is called when in need to know if a player exists
+	bool doesItExist(std::string nome){
+		bool result=false;
+		//i open the file
+		std::ifstream file(jsonPath);
+		//variabile temporanea per contenuti del json
+		json temp;
+		//i put the stream from the file into the variable
+		file >> temp;//it autmatically parse it
+		for (int x = 0; x < temp.size(); x++) {
+			std::cout << "nome n:" << x << "=" << temp[x]["name"]<< std::endl;
+			if (temp[x]["name"] == nome) {
+				result = true;
+				break;
+			}
+		}
+		//std::cout << "----------------------------------------------------------------------------" << std::endl;
+		file.close();
+		return result;
+	}
+
+	int doesItExist(std::string nome,bool tipo) {
+		int result = 0;
+		//i open the file
+		std::ifstream file(jsonPath);
+		//variabile temporanea per contenuti del json
+		json temp;
+		//i put the stream from the file into the variable
+		file >> temp;//it autmatically parse it
+		for (int x = 0; x < temp.size(); x++) {
+			std::cout << "nome n:" << x << "=" << temp[x]["name"] << std::endl;
+			if (temp[x]["name"] == nome) {
+				result = x;
+				break;
+			}
+		}
+		//std::cout << "----------------------------------------------------------------------------" << std::endl;
+		file.close();
+		return result;
+	}
+
+
+
+	//this function si called when i need to modify a specific player data given in input overloading by aurgument
+	//i call this function when i need to change the score by a given name
+	void updatePlayerData(std::string name,int score) {
+		if (!doesItExist(name)) {
+			std::cout << "player con quel nome inesistente";
+			return;
+		}
+		std::ifstream in(jsonPath);
+		json temp;
+		in >> temp;
+		in.close();
+
+		temp[doesItExist(name, true)]["score"] = score;
+		std::ofstream out(jsonPath);
+		out << temp.dump(4);
+		out.close();
+	}
+
+
+	//i call this function when i need to update the name of a player
+	void updatePlayerData(std::string name, std::string newName) {
+		if (!doesItExist(name)) {
+			return;
+		}
+		if (doesItExist(newName)) {
+			//nuovo nome giá presente non possibile updatarlo
+			std::cout << "nome giá esistente" << std::endl;
+			return;
+		}
+		std::ifstream in(jsonPath);
+		json temp;
+		in >> temp;
+		in.close();
+		
+		temp[doesItExist(name, true)]["name"] = newName;
+		std::ofstream out(jsonPath);
+		out << temp.dump(4);
+		out.close();
+	}
+	
+	//this function is called when i need to get the name of the player in return if it exists
+	std::string getInfoPlayer(std::string nome) {
+		if (doesItExist(nome)) {
+			
+			return nome;
+		}
+		else {
+			
+			return NULL;
+		}
+	}
+	//this function is called when i need to get the score of a specified player
+	int getInfoPlayer(std::string nome,bool s) {
+		if (!doesItExist(nome)) {
+			return NULL;
+		}
+
+		std::ifstream file(jsonPath);
+		json temp;
+
+		file >> temp;
+		file.close();
+
+		return temp[doesItExist(nome, true)]["score"];
+	}
+
+
+
+	//this function is called when i need to get the score of a player
+	
+	//this function is called when i need to delte them from the 
 };
