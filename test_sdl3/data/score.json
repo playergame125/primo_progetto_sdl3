@@ -1,26 +1,22 @@
 [
     {
+        "name": "ermine",
+        "score": 2222
+    },
+    {
         "name": "matteo",
-        "score": 223
+        "score": 23
     },
     {
-        "name": "sugo",
-        "score": 2
-    },
-    {
-        "name": "laura",
-        "score": 2
+        "name": "francesco",
+        "score": 65
     },
     {
         "name": "ugo",
         "score": 43
     },
     {
-        "name": "francesco",
-        "score": 23
-    },
-    {
-        "name": "ermine",
-        "score": 43
+        "name": "sugo",
+        "score": 2
     }
 ]

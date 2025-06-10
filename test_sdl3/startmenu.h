@@ -13,11 +13,15 @@ struct Startmenu {
 	SDL_FRect* boxUtente;
 	SDL_FRect* nome_utenteBox;
 	SDL_Texture* textureNomeUtente1;
+	SDL_Texture* score_utente1;
 	SDL_Texture* textureNomeUtente2;
+	SDL_Texture* score_utente2;
 	SDL_Texture* premiSpazioTexture;
 	SDL_FRect* nomePlayer1;
+	SDL_FRect* scoreUtente1;
 	std::string nomeUtente1;
 	SDL_FRect* nomePlayer2;
+	SDL_FRect* scoreUtente2;
 	std::string nomeUtente2;
 	std::string jsonPath;
 	SDL_FRect* premiSpazio;
@@ -28,12 +32,16 @@ struct Startmenu {
 		renderer = input;
 		windowHeight = windowheight;
 		windowWidth = windowwidth;
-		boxUtente = new SDL_FRect{ 0, 0, 250, 150 };
+		boxUtente = new SDL_FRect{ 0, 0, 325, 150 };
 		nomePlayer1 = new SDL_FRect{ 0, 0, 250, 75 };
+		scoreUtente1 = new SDL_FRect{ 250, 0, 75, 75 };
 		nomePlayer2 = new SDL_FRect{ 0, 75, 250, 75 };
+		scoreUtente2 = new SDL_FRect{ 250, 75, 75, 75 };
 		premiSpazio = new SDL_FRect{((float)windowWidth-600)/2 ,(float)windowHeight - 100,600,75 };
-		nomeUtente1 = "matteo";
-		nomeUtente2 = "francesco";
+		nomeUtente1 = "";
+		nomeUtente2 = "";
+		
+		
 		jsonPath = "./data/score.json";
 	}
 
@@ -46,8 +54,12 @@ struct Startmenu {
 		SDL_RenderRect(renderer, boxUtente);
 		//render first player name
 		SDL_RenderTexture(renderer, textureNomeUtente1, NULL, nomePlayer1);
+		//render first player score
+		SDL_RenderTexture(renderer, score_utente1, NULL, scoreUtente1);
 		//render second player name
 		SDL_RenderTexture(renderer, textureNomeUtente2, NULL, nomePlayer2);
+		//render second player score
+		SDL_RenderTexture(renderer, score_utente2, NULL, scoreUtente2);
 		//render premi spazio per giocare
 		SDL_RenderTexture(renderer, premiSpazioTexture, NULL, premiSpazio);
 		SDL_RenderPresent(renderer);
@@ -70,19 +82,26 @@ struct Startmenu {
 			std::cout << "aggiornato nome--";
 			//insert load from file to test
 
-
+			nomeUtente1 = getInfoPlayer(1);
+			nomeUtente2 = getInfoPlayer(2);
+			
 
 			createTesto(nomeUtente1.c_str(), &textureNomeUtente1, 255, 255, 255, 255);
 			createTesto(nomeUtente2.c_str(), &textureNomeUtente2, 255, 255, 255, 255);
 			createTesto("premi spazio per giocare", &premiSpazioTexture, 127, 127, 127, 255);
+			createTesto(std::to_string(getInfoPlayer(nomeUtente1, true)).c_str(), &score_utente1, 255, 255, 255, 255);
+			createTesto(std::to_string(getInfoPlayer(nomeUtente2, true)).c_str(), &score_utente2, 255, 255, 255, 255);
 			//createJsonFile(jsonPath);
 			//appendPlayer("francesco", 23);
 			//appendPlayer("ugo", 43);
 			//std::cout<<doesItExist("lollo");
 			//std::cout <<doesItExist("laura");
-			updatePlayerData("lorenso", "laura");
-			std::cout << "output get info=" << getInfoPlayer("laura");
-			std::cout << "score di matteo" << getInfoPlayer("matteo", true);
+			//updatePlayerData("lorenso", "laura");
+			std::cout << "output get info using int=" << getInfoPlayer(3);
+			std::cout << "score di ermine" << getInfoPlayer(getInfoPlayer(3), true);
+			//swapPosition("francesco", "ermine");
+			putPlayerInPosition("matteo", 1);
+			//eliminatePlayer("francesco");
 
 			//updatePlayerData("sugo", 2);
 
@@ -152,6 +171,7 @@ struct Startmenu {
 		json temp;
 		//i put the stream from the file into the variable
 		file >> temp;//it autmatically parse it
+		file.close();
 		for (int x = 0; x < temp.size(); x++) {
 			std::cout << "nome n:" << x << "=" << temp[x]["name"]<< std::endl;
 			if (temp[x]["name"] == nome) {
@@ -160,10 +180,10 @@ struct Startmenu {
 			}
 		}
 		//std::cout << "----------------------------------------------------------------------------" << std::endl;
-		file.close();
+		std::cout << "\n result does it exist=" << result;
 		return result;
 	}
-
+	//i call this function when i need to get the position of a certain player on the array
 	int doesItExist(std::string nome,bool tipo) {
 		int result = 0;
 		//i open the file
@@ -234,13 +254,13 @@ struct Startmenu {
 		}
 		else {
 			
-			return NULL;
+			return "";
 		}
 	}
 	//this function is called when i need to get the score of a specified player
 	int getInfoPlayer(std::string nome,bool s) {
 		if (!doesItExist(nome)) {
-			return NULL;
+			return 0;
 		}
 
 		std::ifstream file(jsonPath);
@@ -251,10 +271,99 @@ struct Startmenu {
 
 		return temp[doesItExist(nome, true)]["score"];
 	}
+	//this function is called when i need to get the name of a specified player given the position on the array
+	std::string getInfoPlayer(int position) {
+		std::ifstream file(jsonPath);
+		json temp;
+		file >> temp;
+		file.close();
+		if (position >= temp.size())
+			return "";
+		return temp[position]["name"];
+	}
 
+	//this function is called when i need to delete a specific player them from the savefile
+	void eliminatePlayer(std::string nome) {
+		std::ifstream file(jsonPath);
+		json temp;
+		file >> temp;
+		file.close();
+		if (doesItExist(nome)) {
+			int target = doesItExist(nome, true);
+			temp.erase(target);
+		}
+		else {
+			//std::cout << "non trovato nel eliminate player";
+			return;
+		}
 
+		std::ofstream out(jsonPath);
+		out << temp.dump(4);
+		out.close();
+		
+	}
 
-	//this function is called when i need to get the score of a player
-	
-	//this function is called when i need to delte them from the 
+	//this function is called when i need to swap 2 players position
+	void swapPosition(int posizione1,int posizione2) {
+		
+		std::ifstream file(jsonPath);
+		json temp;
+		file >> temp;
+		file.close();
+		if ((posizione1 > temp.size() || posizione2 > temp.size()) && posizione1 != posizione2) {
+			std::cout << " \n valore invalido";
+			return;
+		}
+			
+
+		json appoggio;
+		appoggio = temp[posizione1];
+		temp[posizione1] = temp[posizione2];
+		temp[posizione2] = appoggio;
+
+		std::ofstream out(jsonPath);
+		out << temp.dump(4);
+		out.close();
+		std::cout << " \n finito swap position";
+	}
+	//this function is called when i need to swap 2 players position
+	void swapPosition(std::string nome1, std::string nome2) {
+		if (doesItExist(nome1) && doesItExist(nome2)) {
+			std::ifstream file(jsonPath);
+			json temp;
+			file >> temp;
+			file.close();
+			swapPosition(doesItExist(nome1, true), doesItExist(nome2, true));
+
+		}
+		else {
+			return;
+		}
+
+	}
+	//this function is called when i need to put a player in a determined position swap 2 players position
+	void putPlayerInPosition(std::string nome1, int pos) {
+		if (doesItExist(nome1)) {
+			std::ifstream file(jsonPath);
+			json temp;
+			file >> temp;
+			file.close();
+			if (pos > temp.size() || pos < 0)
+				return;
+			int oldPos = doesItExist(nome1, true);
+			if (pos == oldPos)
+				return;
+			json appoggio = temp[oldPos];
+			temp.erase(oldPos);
+			temp.insert(temp.begin() + pos, appoggio);
+			std::ofstream out(jsonPath);
+			out << temp.dump(4);
+			out.close();
+		}
+		else {
+			return;
+		}
+
+	}
+
 };
