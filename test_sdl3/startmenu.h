@@ -27,6 +27,9 @@ struct Startmenu {
 	SDL_FRect* premiSpazio;
 	int windowWidth;
 	int windowHeight;
+	//this variable indicate if the player clics the add button and remain true until the player doesn't confirm
+	bool isTyping=false;
+
 	int times = 0;
 	void init(SDL_Renderer* input,int windowheight,int windowwidth) {
 		renderer = input;
@@ -110,7 +113,8 @@ struct Startmenu {
 		}
 	}
 
-
+	
+	
 	//this function is called when are sure that there is no json file and it creates it in the path that it gives to me
 	void createJsonFile(std::string path) {
 		//create/open file
