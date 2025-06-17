@@ -27,6 +27,9 @@ struct Startmenu {
 	SDL_FRect* premiSpazio;
 	int windowWidth;
 	int windowHeight;
+	//this is the rectangle of the button add wich when pressed will open a dialoge box where the user
+	SDL_FRect* buttonAdd;
+
 	//this variable indicate if the player clics the add button and remain true until the player doesn't confirm
 	bool isTyping=false;
 
@@ -43,6 +46,7 @@ struct Startmenu {
 		premiSpazio = new SDL_FRect{((float)windowWidth-600)/2 ,(float)windowHeight - 100,600,75 };
 		nomeUtente1 = "";
 		nomeUtente2 = "";
+		buttonAdd = new SDL_FRect{ (float)windowwidth - 64,(float)windowheight - 64,64,64 };
 		
 		
 		jsonPath = "./data/score.json";
@@ -65,6 +69,12 @@ struct Startmenu {
 		SDL_RenderTexture(renderer, score_utente2, NULL, scoreUtente2);
 		//render premi spazio per giocare
 		SDL_RenderTexture(renderer, premiSpazioTexture, NULL, premiSpazio);
+		//render the button to enter dialogue mode
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_RenderFillRect(renderer, buttonAdd);
+		if (isTyping) {
+			//do something
+		}
 		SDL_RenderPresent(renderer);
 
 
@@ -107,6 +117,10 @@ struct Startmenu {
 			//eliminatePlayer("francesco");
 
 			//updatePlayerData("sugo", 2);
+			if (isTyping) {
+				// if the player is tipyng in the input box stays here
+
+			}
 
 
 			times = 1;
