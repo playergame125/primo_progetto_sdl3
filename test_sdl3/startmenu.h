@@ -7,7 +7,7 @@
 
 struct Startmenu {
 	using json = nlohmann::json;
-	
+	SDL_Event* EVENTHANDLER;
 	int top_score;
 	SDL_Renderer* renderer;
 	SDL_FRect* boxUtente;
@@ -30,11 +30,15 @@ struct Startmenu {
 	//this is the rectangle of the button add wich when pressed will open a dialoge box where the user
 	SDL_FRect* buttonAdd;
 
+	//this is the texture of the text inserted by the player this will be updated only when new keys on the keyboard are pressed
+	SDL_Texture* textFieldLivePreview;
+	std::string TextLivePreview;
+
 	//this variable indicate if the player clics the add button and remain true until the player doesn't confirm
 	bool isTyping=false;
 
 	int times = 0;
-	void init(SDL_Renderer* input,int windowheight,int windowwidth) {
+	void init(SDL_Renderer* input,int windowheight,int windowwidth,SDL_Event* evento) {
 		renderer = input;
 		windowHeight = windowheight;
 		windowWidth = windowwidth;
@@ -46,7 +50,11 @@ struct Startmenu {
 		premiSpazio = new SDL_FRect{((float)windowWidth-600)/2 ,(float)windowHeight - 100,600,75 };
 		nomeUtente1 = "";
 		nomeUtente2 = "";
-		buttonAdd = new SDL_FRect{ (float)windowwidth - 64,(float)windowheight - 64,64,64 };
+		buttonAdd = new SDL_FRect{ (float)windowwidth - 80, 16,64,64 };
+		EVENTHANDLER = evento;
+		
+		//only debug
+		isTyping = true;
 		
 		
 		jsonPath = "./data/score.json";
@@ -74,10 +82,15 @@ struct Startmenu {
 		SDL_RenderFillRect(renderer, buttonAdd);
 		if (isTyping) {
 			//do something
+			
 		}
 		SDL_RenderPresent(renderer);
 
 
+	}
+
+	void catchinput(SDL_Event* eventhandler) {
+		//change the logic to manualli get the input like in the input
 	}
 
 	 void createTesto(const char* testo,SDL_Texture** player,int r,int g,int b,int t) {
@@ -117,13 +130,16 @@ struct Startmenu {
 			//eliminatePlayer("francesco");
 
 			//updatePlayerData("sugo", 2);
-			if (isTyping) {
-				// if the player is tipyng in the input box stays here
-
-			}
+			std::cout << " \ tyoing="<<isTyping;
+			
 
 
 			times = 1;
+		}
+		if (isTyping) {
+			// if the player is tipyng in the input box stays here
+			catchinput(EVENTHANDLER);
+			//std::cout << " \npassato per catchinput";
 		}
 	}
 

@@ -17,7 +17,7 @@
 #define POINTBOXH 200//heigtpoint box
 #define FPS_CAP 80
 
-
+SDL_Event event;
 std::random_device generatore_random;
 std::mt19937 gen(generatore_random());
 
@@ -81,8 +81,8 @@ enum GameState
 
 int game = STARTMENU;
 
+
 void HandleEvents(bool* running) {
-    SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
             *running = false;
@@ -280,7 +280,7 @@ int main(int argc, char* argv[]) {
     //debug shit
     bool passato = false;
     //initializa the start menu
-    startmenu->init(renderer,WINDOW_HEIGHT,WINDOW_WIDTH);
+    startmenu->init(renderer,WINDOW_HEIGHT,WINDOW_WIDTH,&event);
     pausemenu->init(renderer, WINDOW_HEIGHT, WINDOW_WIDTH);
     gamovermenu->init(renderer, WINDOW_HEIGHT, WINDOW_WIDTH,player1,player2);
     //assign player name
