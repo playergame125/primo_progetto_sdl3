@@ -91,6 +91,7 @@ struct Startmenu {
 
 	void catchinput(SDL_Event* eventhandler) {
 		//change the logic to manualli get the input like in the input
+		
 	}
 
 	 void createTesto(const char* testo,SDL_Texture** player,int r,int g,int b,int t) {
